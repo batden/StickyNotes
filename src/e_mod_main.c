@@ -395,7 +395,7 @@ _sticky_notes_conf_new(void)
    IFMODCFG(0x008d);
    sticky_notes_conf->switch1 = 1;
 
-   ci->id = eina_stringshare_add(id);
+   //~ ci->id = eina_stringshare_add(id);
    ci->header_switch = 0;
    ci->multiply_switch = 0;
    ci->notif_switch = 0;
@@ -687,10 +687,7 @@ _font_size_show(void *data, Eina_Bool save, const char *chr)
    Instance *inst = data;
    char buf[64];
 
-   if (inst->ci->font_size < 10)
-     snprintf(buf, sizeof(buf), " %d", inst->ci->font_size);
-   else
-     snprintf(buf, sizeof(buf), "%d", inst->ci->font_size);
+   snprintf(buf, sizeof(buf), "%02d", inst->ci->font_size);
 
    edje_object_signal_emit(inst->o_sticky_notes, "size_visible", "");
    edje_object_message_signal_process(inst->o_sticky_notes);
