@@ -590,16 +590,15 @@ _sticky_notes_config_updated(Config_Item *ci)
         inst = l->data;
         if (inst->ci != ci) continue;
 
-        ecore_timer_del(inst->timer);
+        if (inst->timer)
+          {
+            ecore_timer_del(inst->timer);
+            inst->timer = NULL;
+          }
         multi = inst->ci->multiply_switch ? 60 : 1;
-
-        if (inst->ci->interval>0)
-           inst->timer = ecore_timer_add(inst->ci->interval * multi, _sticky_notes_cb_check, inst);
-            
-        if (inst->ci->command[0] == '\0')
-           ecore_timer_del(inst->timer);
-
-        _sticky_notes_cb_check(inst);
+        if ((inst->ci->interval > 0) && inst->ci->command && inst->ci->command[0])
+          inst->timer = ecore_timer_add(inst->ci->interval * multi, _sticky_notes_cb_check, inst);
+       _sticky_notes_cb_check(inst);
      }
 }
 
