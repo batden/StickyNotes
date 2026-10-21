@@ -105,6 +105,15 @@ static void
 _free_data(E_Config_Dialog *cfd __UNUSED__, E_Config_Dialog_Data *cfdata) 
 {
    sticky_notes_conf->cfd = NULL;
+   free(cfdata->header_text);
+   free(cfdata->command);
+   free(cfdata->notif_text);
+   free(cfdata->area_text_1);
+   free(cfdata->area_text_2);
+   free(cfdata->area_text_3);
+   free(cfdata->area_text_4);
+   free(cfdata->area_text_5);
+   eina_list_free(cfdata->ui.disable_list);
    E_FREE(cfdata);
 }
 

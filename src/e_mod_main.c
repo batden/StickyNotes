@@ -381,11 +381,7 @@ _gc_icon(const E_Gadcon_Client_Class *client_class __UNUSED__, Evas *evas)
 static void 
 _sticky_notes_conf_new(void)
 {
-   Config_Item *ci = NULL;
-
    sticky_notes_conf = E_NEW(Config, 1);
-   ci = E_NEW(Config_Item, 1);
-
    sticky_notes_conf->version = (MOD_CONFIG_FILE_EPOCH << 16);
 
 #define IFMODCFG(v) if ((sticky_notes_conf->version & 0xffff) < v) {
@@ -394,25 +390,6 @@ _sticky_notes_conf_new(void)
    /* setup defaults */
    IFMODCFG(0x008d);
    sticky_notes_conf->switch1 = 1;
-
-   //~ ci->id = eina_stringshare_add(id);
-   ci->header_switch = 0;
-   ci->multiply_switch = 0;
-   ci->notif_switch = 0;
-   ci->font_size = 12;
-   ci->interval = 0.0;
-   ci->val.r = 255;
-   ci->val.g = 255;
-   ci->val.b = 255;
-   ci->val.a = 255;
-   ci->header_text = eina_stringshare_add(D_("Sticky note"));
-   ci->command = eina_stringshare_add("");
-   ci->area_text_1 = eina_stringshare_add("");
-   ci->area_text_2 = eina_stringshare_add("");
-   ci->area_text_3 = eina_stringshare_add("");
-   ci->area_text_4 = eina_stringshare_add("");
-   ci->area_text_5 = eina_stringshare_add("");
-   ci->notif_text = eina_stringshare_add("");
 
    _sticky_notes_conf_item_get(NULL);
    IFMODCFGEND;
@@ -773,6 +750,7 @@ show_command_output(void *data, Eina_Bool header_clicked)
      }
 
    /* Reading command output to the eina buffer*/
+   char *utf;
    output = popen(command, "r");
    if (output)
      {
@@ -780,8 +758,8 @@ show_command_output(void *data, Eina_Bool header_clicked)
          {
            // ncal purpose (when actual date on the left)
            eina_strbuf_append(inst->eina_buf, " ");
-           eina_strbuf_append(inst->eina_buf,
-                              evas_textblock_text_utf8_to_markup(NULL, line));
+           utf = evas_textblock_text_utf8_to_markup(NULL, line);
+           eina_strbuf_append(inst->eina_buf, utf);
          }
      }
 
@@ -789,6 +767,7 @@ show_command_output(void *data, Eina_Bool header_clicked)
    eina_strbuf_append(inst->eina_temp, eina_strbuf_string_get(inst->eina_buf));
    pclose(output);
    free(command);
+   free (utf);
 
    eina_strbuf_append(inst->eina_buf, "</font_size>");
 
@@ -802,11 +781,13 @@ show_command_output(void *data, Eina_Bool header_clicked)
        sprintf(day_a, " %s ", today);
        sprintf(day_b, "|<b>%s</b>|", today);
        eina_strbuf_replace(inst->eina_buf, day_a, day_b, 1);
+       free(today);
 
        day_w = get_today("day_w");
        sprintf(day_a, " %s ", day_w);
        sprintf(day_b, " <b>%s</b> ", day_w);
        eina_strbuf_replace(inst->eina_buf, day_a, day_b, 1);
+       free(day_w);
      }
 
    /*condition if the text has been changed*/
