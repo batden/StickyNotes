@@ -750,24 +750,26 @@ show_command_output(void *data, Eina_Bool header_clicked)
      }
 
    /* Reading command output to the eina buffer*/
-   char *utf;
+
    output = popen(command, "r");
    if (output)
      {
-       while (fgets(line, 256, output) != NULL)
-         {
-           // ncal purpose (when actual date on the left)
-           eina_strbuf_append(inst->eina_buf, " ");
-           utf = evas_textblock_text_utf8_to_markup(NULL, line);
-           eina_strbuf_append(inst->eina_buf, utf);
-         }
+       while (fgets(line, sizeof(line), output))
+       {
+          char *utf = evas_textblock_text_utf8_to_markup(NULL, line);
+          eina_strbuf_append(inst->eina_buf, " ");
+          if (utf)
+            {
+               eina_strbuf_append(inst->eina_buf, utf);
+               free(utf);
+            }
+       }
      }
 
    eina_strbuf_reset(inst->eina_temp);
    eina_strbuf_append(inst->eina_temp, eina_strbuf_string_get(inst->eina_buf));
    pclose(output);
    free(command);
-   free (utf);
 
    eina_strbuf_append(inst->eina_buf, "</font_size>");
 
