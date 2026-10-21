@@ -56,6 +56,7 @@ struct _Instance
    Eina_Strbuf *eina_buf;
    Eina_Strbuf *eina_temp;
    Eina_Strbuf *eina_compare;
+   Ecore_Event_Handler *h_resume, *h_time;
 
    /* Config_Item structure. Every gadget should have one :) */
    Config_Item *ci;
@@ -278,8 +279,8 @@ _gc_init(E_Gadcon *gc, const char *name, const char *id, const char *style)
    edje_object_signal_callback_add(inst->o_sticky_notes, "settings,activated", "stickynotes",
                                    _sticky_settings_activated_cb, inst);
 
-   ecore_event_handler_add(E_EVENT_SYS_RESUME, _change_cb, inst);
-   ecore_event_handler_add(ECORE_EVENT_SYSTEM_TIMEDATE_CHANGED, _change_cb, inst);
+   inst->h_resume = ecore_event_handler_add(E_EVENT_SYS_RESUME, _change_cb, inst);
+   inst->h_time = ecore_event_handler_add(ECORE_EVENT_SYSTEM_TIMEDATE_CHANGED, _change_cb, inst);
 
    multi = inst->ci->multiply_switch ? 60 : 1;
 
@@ -331,6 +332,8 @@ _gc_shutdown(E_Gadcon_Client *gcc)
                                    _sticky_settings_activated_cb);
         evas_object_del(inst->o_sticky_notes);
      }
+   ecore_event_handler_del(inst->h_resume);
+   ecore_event_handler_del(inst->h_time);
    E_FREE(inst);
 }
 
@@ -745,7 +748,7 @@ show_command_output(void *data, Eina_Bool header_clicked)
 
    if (!strncmp(inst->ci->command, "ncal", 4))
      {
-        command = realloc(command, strlen(command) + 3);
+        command = realloc(command, strlen(command) + 4);
         strcat(command, " -h");
      }
 
@@ -768,7 +771,7 @@ show_command_output(void *data, Eina_Bool header_clicked)
 
    eina_strbuf_reset(inst->eina_temp);
    eina_strbuf_append(inst->eina_temp, eina_strbuf_string_get(inst->eina_buf));
-   pclose(output);
+   if (output) pclose(output);
    free(command);
 
    eina_strbuf_append(inst->eina_buf, "</font_size>");
